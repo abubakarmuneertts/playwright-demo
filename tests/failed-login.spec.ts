@@ -17,10 +17,8 @@ test('login should fail with wrong password', async ({ page }) => {
   // Step 4: Click the Login button
   await page.locator('[data-test="login-button"]').click();
 
-  // Step 5: Verify login FAILED — the error message must appear
-  // and the user must stay on the login page (not reach inventory).
-  await expect(page.locator('[data-test="error"]')).toContainText(
-    'Username and password do not match any user in this service'
-  );
-  await expect(page).not.toHaveURL(/.*inventory.html/);
+  // INTENTIONALLY BROKEN FOR DEMO: with a wrong password the user can never
+  // reach the inventory page, so this assertion is guaranteed to fail.
+  // Revert this to the error-message check after the demo.
+  await expect(page).toHaveURL(/.*inventory.html/);
 });
