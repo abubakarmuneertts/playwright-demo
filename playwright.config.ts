@@ -11,6 +11,10 @@ export default defineConfig({
     baseURL: 'https://www.saucedemo.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Set SLOWMO env var (milliseconds) to slow down each action for demos
+    launchOptions: {
+      slowMo: process.env.SLOWMO ? Number(process.env.SLOWMO) : 0,
+    },
   },
   projects: [
     {
