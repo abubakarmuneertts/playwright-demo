@@ -1,14 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { USERS } from './test-data';
 
 test('valid login with standard_user should succeed', async ({ page }) => {
   // Step 1: Go to the URL (baseURL = https://www.saucedemo.com)
   await page.goto('/');
 
   // Step 2: Fill username
-  await page.locator('[data-test="username"]').fill('standard_user');
+  await page.locator('[data-test="username"]').fill(USERS.standard.username);
 
   // Step 3: Fill password
-  await page.locator('[data-test="password"]').fill('secret_sauce');
+  await page.locator('[data-test="password"]').fill(USERS.standard.password);
 
   // Step 4: Click the Login button
   await page.locator('[data-test="login-button"]').click();

@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+
+// Load credentials from the local .env file (gitignored).
+// On GitHub Actions the same variables come from repo Secrets instead.
+dotenv.config();
 
 export default defineConfig({
   testDir: './tests',
