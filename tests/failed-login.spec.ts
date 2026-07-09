@@ -17,7 +17,10 @@ test('login should fail with wrong password', async ({ page }) => {
   // Step 4: Click the Login button
   await page.locator('[data-test="login-button"]').click();
 
-  // TEMPORARY: intentionally failing assertion to test the Slack alert.
-  // Will be reverted right after the Slack notification is confirmed.
-  await expect(page).toHaveURL(/.*inventory.html/);
+  // Step 5: Verify login FAILED — the error message must appear
+  // and the user must stay on the login page (not reach inventory).
+  await expect(page.locator('[data-test="error"]')).toContainText(
+    'Username and password do not match any user in this service'
+  );
+  await expect(page).not.toHaveURL(/.*inventory.html/);
 });
