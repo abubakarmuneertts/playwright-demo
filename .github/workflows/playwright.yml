@@ -38,17 +38,24 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      # Sends a Slack message only when tests FAIL.
+      # Sends a Slack summary after every run: ✅/❌ + passed/failed counts.
+      # Counts come from the JSON report written by the json reporter.
       # Skips quietly if the SLACK_WEBHOOK_URL secret is missing.
-      - name: Notify Slack on failure
-        if: failure()
+      - name: Notify Slack with test summary
+        if: ${{ !cancelled() }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          JOB_STATUS: ${{ job.status }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "SLACK_WEBHOOK_URL secret not set - skipping Slack notification"
             exit 0
           fi
+          PASSED=$(jq '.stats.expected // 0' test-results/results.json)
+          FAILED=$(jq '.stats.unexpected // 0' test-results/results.json)
+          FLAKY=$(jq '.stats.flaky // 0' test-results/results.json)
+          SKIPPED=$(jq '.stats.skipped // 0' test-results/results.json)
+          if [ "$JOB_STATUS" = "success" ]; then EMOJI="✅"; else EMOJI="❌"; fi
           curl -s -X POST -H 'Content-type: application/json' --data \
-            "{\"text\":\"❌ Playwright tests FAILED\nRepo: ${{ github.repository }}\nCommit: ${{ github.event.head_commit.message }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "{\"text\":\"$EMOJI Playwright tests: $JOB_STATUS\nPassed: $PASSED | Failed: $FAILED | Flaky: $FLAKY | Skipped: $SKIPPED\nCommit: ${{ github.event.head_commit.message }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
             "$SLACK_WEBHOOK_URL"
