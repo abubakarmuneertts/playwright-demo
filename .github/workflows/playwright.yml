@@ -37,3 +37,18 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+      # Sends a Slack message only when tests FAIL.
+      # Skips quietly if the SLACK_WEBHOOK_URL secret is missing.
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret not set - skipping Slack notification"
+            exit 0
+          fi
+          curl -s -X POST -H 'Content-type: application/json' --data \
+            "{\"text\":\"❌ Playwright tests FAILED\nRepo: ${{ github.repository }}\nCommit: ${{ github.event.head_commit.message }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "$SLACK_WEBHOOK_URL"
